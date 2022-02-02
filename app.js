@@ -3,27 +3,28 @@ const bodyParser = require('body-parser');
 
 const app = express();
 
-var items = ['Eat', 'Sleep', 'Work', 'Repeat'];
+let items = ['Eat', 'Sleep', 'Work', 'Repeat'];
 
 app.set('view engine', 'ejs');
 
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.static('public'));
 
 app.get('/', function (request, response) {
-    var today = new Date();
-    var options = {
+    let today = new Date();
+    let options = {
         weekday: 'long',
         day: 'numeric',
         month: 'long'
     };
 
-    var day = today.toLocaleDateString('en-US', options)
+    let day = today.toLocaleDateString('en-US', options)
 
     response.render('list', { kindOfDay: day, allItems: items });
 });
 
 app.post('/', function (request, response) {
-    var item = request.body.todoItem;
+    let item = request.body.todoItem;
     items.push(item);
     response.redirect('/');
 });

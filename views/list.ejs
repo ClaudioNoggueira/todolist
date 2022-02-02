@@ -6,24 +6,37 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>To Do List</title>
+
+    <!-- Unicons -->
+    <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css">
+
+    <link rel="stylesheet" href="css/styles.css">
 </head>
 
 <body>
-    <h1>
-        <%= kindOfDay %>
-    </h1>
+    <div class="container">
+        <div class="box heading">
+            <h1 class="title">
+                <%= kindOfDay %>
+            </h1>
+        </div>
+        <div class="box items">
+            <% allItems.forEach(item=> { %>
+                <div class="item">
+                    <input type="checkbox" name="checkItem" id="checkItem">
+                    <p>
+                        <%= item %>
+                    </p>
+                </div>
+                <% }); %>
+                    <form class="item new-item-container" action="/" method="POST">
+                        <input class="new-item" type="text" name="todoItem" id="todoItem" placeholder="New item"
+                            autocomplete="off">
+                        <button class="btn-new-item" type="submit">+</button>
+                    </form>
+        </div>
+    </div>
 
-    <ul>
-        <% allItems.forEach(item=> { %>
-            <li>
-                <%= item %>
-            </li>
-            <% }); %>
-    </ul>
-    <form action="/" method="POST">
-        <input type="text" name="todoItem" id="todoItem">
-        <button type="submit">Adicionar</button>
-    </form>
 </body>
 
 </html>
