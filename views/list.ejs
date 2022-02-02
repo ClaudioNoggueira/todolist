@@ -13,6 +13,17 @@
         <%= kindOfDay %>
     </h1>
 
+    <ul>
+        <% allItems.forEach(item=> { %>
+            <li>
+                <%= item %>
+            </li>
+            <% }); %>
+    </ul>
+    <form action="/" method="POST">
+        <input type="text" name="todoItem" id="todoItem">
+        <button type="submit">Adicionar</button>
+    </form>
 </body>
 
 </html>

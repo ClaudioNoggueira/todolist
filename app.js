@@ -3,6 +3,8 @@ const bodyParser = require('body-parser');
 
 const app = express();
 
+var items = ['Eat', 'Sleep', 'Work', 'Repeat'];
+
 app.set('view engine', 'ejs');
 
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -15,11 +17,16 @@ app.get('/', function (request, response) {
         month: 'long'
     };
 
-    var day = today.toLocaleDateString('pt-BR', options)
+    var day = today.toLocaleDateString('en-US', options)
 
-    response.render('list', { kindOfDay: day });
+    response.render('list', { kindOfDay: day, allItems: items });
 });
 
+app.post('/', function (request, response) {
+    var item = request.body.todoItem;
+    items.push(item);
+    response.redirect('/');
+});
 
 
 app.listen(3000, function () {
