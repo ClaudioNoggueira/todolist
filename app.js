@@ -30,17 +30,20 @@ const hint2 = new Item({
     name: '<-- Hit this to delete an item.'
 });
 
-// Item.insertMany([welcome, hint1, hint2], function (err) {
-//     if (err) {
-//         console.log(err);
-//     } else {
-//         console.log('✔ Successfully added to collection');
-//     }
-// });
-
 app.get('/', function (request, response) {
     const day = date.getDate();
-    response.render('list', { listTitle: day, allItems: [welcome.name, hint1.name, hint2.name] });
+    Item.find(function (err, documents) {
+        if (documents.length === 0) { /// if there is no documents on database
+            Item.insertMany([welcome, hint1, hint2], function (err) {
+                if (err) {
+                    console.log(err);
+                } else {
+                    console.log('✔ Successfully added default items to collection');
+                }
+            });
+        }
+        response.render('list', { listTitle: day, allItems: documents });
+    });
 });
 
 app.get('/work', function (request, response) {
