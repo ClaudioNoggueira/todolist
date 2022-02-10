@@ -40,6 +40,10 @@ const listSchema = new mongoose.Schema({
 const List = mongoose.model('List', listSchema);
 
 app.get('/', function (request, response) {
+    response.redirect('/home');
+});
+
+app.get('/home', function (request, response) {
     const day = date.getDate();
     Item.find(function (err, documents) {
         if (documents.length === 0) { /// if there is no documents on database
@@ -56,21 +60,18 @@ app.get('/', function (request, response) {
 });
 
 app.get('/:listTitle', function (request, response) {
-    const newListTitle = request.params.listTitle;
-
-    List.findOne({ name: newListTitle }, function (err, result) {
+    List.findOne({ name: request.params.listTitle }, function (err, result) {
         if (!err) {
             if (!result) { // doesn't exists, so create a new one
                 const list = new List({
-                    name: newListTitle,
+                    name: request.params.listTitle,
                     items: defaultItems
                 });
 
                 list.save();
-                response.redirect('/' + newListTitle)
+                response.redirect('/' + request.params.listTitle)
             } else { // exists
-                // console.log('There is already a list with that name.');
-                response.render('list', { listTitle: request.params.listTitle + " list", allItems: result.items })
+                response.render('list', { listTitle: result.name, allItems: result.items })
             }
         } else {
             console.log("Unable to find list.");
@@ -79,12 +80,22 @@ app.get('/:listTitle', function (request, response) {
 });
 
 app.post('/', function (request, response) {
+    const listName = request.body.listName;
+
     const newItem = new Item({
-        name: request.body.todoItem
+        name: request.body.newItem
     });
 
-    newItem.save();
-    response.redirect('/');
+    if (listName === date.getDate()) {
+        newItem.save();
+        response.redirect('/');
+    } else {
+        List.findOne({ name: listName }, function (err, result) {
+            result.items.push(newItem);
+            result.save();
+            response.redirect('/' + listName);
+        });
+    }
 });
 
 app.post('/delete', function (request, response) {
