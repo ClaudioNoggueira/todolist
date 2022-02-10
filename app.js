@@ -46,6 +46,7 @@ app.get('/', function (request, response) {
     });
 });
 
+
 app.get('/work', function (request, response) {
     response.render('list', { listTitle: 'Work list', allItems: workItems })
 });
@@ -65,6 +66,16 @@ app.post('/', function (request, response) {
 
     newItem.save();
     response.redirect('/');
+});
+
+app.post('/delete', function (request, response) {
+    const checkedItemId = request.body.checkItem;
+    Item.findByIdAndRemove({ _id: checkedItemId }, function (err) {
+        if (!err) {
+            console.log("Successfully deleted checked item.");
+            response.redirect('/');
+        }
+    });
 });
 
 app.listen(3000, function () {

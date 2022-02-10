@@ -8,13 +8,17 @@
         </div>
         <div class="box items">
             <% allItems.forEach(item=> { %>
-                <div class="item">
-                    <input type="checkbox" name="checkItem" id="checkItem">
-                    <p>
-                        <%= item.name %>
-                    </p>
-                </div>
+                <form action="/delete" method="post">
+                    <div class="item">
+                        <input type="checkbox" name="checkItem" id="checkItem" value=<%=item._id %>
+                        onchange="this.form.submit()">
+                        <p>
+                            <%= item.name %>
+                        </p>
+                    </div>
+                </form>
                 <% }); %>
+
                     <form class="item new-item-container" action="/" method="POST">
                         <input class="new-item" type="text" name="todoItem" id="todoItem" placeholder="New item"
                             autocomplete="off">
