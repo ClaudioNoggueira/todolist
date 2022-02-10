@@ -51,15 +51,20 @@ app.get('/work', function (request, response) {
 });
 
 app.post('/', function (request, response) {
-    const item = request.body.todoItem;
+    const newItem = new Item({
+        name: request.body.todoItem
+    });
 
-    if (request.body.listSubject === 'Work') {
-        workItems.push(item);
-        response.redirect('/work')
-    } else {
-        items.push(item);
-        response.redirect('/');
-    }
+    // if (request.body.listSubject === 'Work') {
+    //     workItems.push(item);
+    //     response.redirect('/work')
+    // } else {
+    //     items.push(item);
+    //     response.redirect('/');
+    // }
+
+    newItem.save();
+    response.redirect('/');
 });
 
 app.listen(3000, function () {
