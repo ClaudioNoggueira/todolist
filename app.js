@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const date = require(__dirname + '/date.js');
 const mongoose = require('mongoose');
+const _ = require('lodash');
 
 const app = express();
 
@@ -39,15 +40,15 @@ const listSchema = new mongoose.Schema({
 
 const List = mongoose.model('List', listSchema);
 
-app.get('/', function (request, response) {
+app.get('/', (request, response) => {
     response.redirect('/home');
 });
 
-app.get('/home', function (request, response) {
+app.get('/home', (request, response) => {
     const day = date.getDate();
-    Item.find(function (err, documents) {
+    Item.find((err, documents) => {
         if (documents.length === 0) { /// if there is no documents on database
-            Item.insertMany(defaultItems, function (err) {
+            Item.insertMany(defaultItems, (err) => {
                 if (err) {
                     console.log(err);
                 } else {
@@ -59,55 +60,66 @@ app.get('/home', function (request, response) {
     });
 });
 
-app.get('/:listTitle', function (request, response) {
-    List.findOne({ name: request.params.listTitle }, function (err, result) {
+app.get('/:listTitle', (request, response) => {
+    const listTitle = _.capitalize(request.params.listTitle);
+    List.findOne({ name: listTitle }, (err, queryResult) => {
         if (!err) {
-            if (!result) { // doesn't exists, so create a new one
+            if (!queryResult) {
                 const list = new List({
-                    name: request.params.listTitle,
+                    name: listTitle,
                     items: defaultItems
                 });
 
                 list.save();
-                response.redirect('/' + request.params.listTitle)
-            } else { // exists
-                response.render('list', { listTitle: result.name, allItems: result.items })
+                response.redirect('/' + listTitle);
+            } else {
+                response.render('list', { listTitle: queryResult.name, allItems: queryResult.items })
             }
         } else {
-            console.log("Unable to find list.");
+            console.log("Unable to find list. Error: " + err);
         }
     });
 });
 
-app.post('/', function (request, response) {
-    const listName = request.body.listName;
+app.post('/', (request, response) => {
+    const list = request.body.list;
 
     const newItem = new Item({
         name: request.body.newItem
     });
 
-    if (listName === date.getDate()) {
+    if (list === date.getDate()) {
         newItem.save();
         response.redirect('/');
     } else {
-        List.findOne({ name: listName }, function (err, result) {
+        List.findOne({ name: list }, (err, result) => {
             result.items.push(newItem);
             result.save();
-            response.redirect('/' + listName);
+            response.redirect('/' + list);
         });
     }
 });
 
-app.post('/delete', function (request, response) {
+app.post('/delete', (request, response) => {
     const checkedItemId = request.body.checkItem;
-    Item.findByIdAndRemove({ _id: checkedItemId }, function (err) {
-        if (!err) {
-            console.log("Successfully deleted checked item.");
-            response.redirect('/');
-        }
-    });
+    const listName = request.body.listName;
+
+    if (listName === date.getDate()) {
+        Item.findByIdAndRemove({ _id: checkedItemId }, (err) => {
+            if (!err) {
+                console.log("Successfully deleted checked item.");
+                response.redirect('/');
+            }
+        });
+    } else {
+        List.findOneAndUpdate({ name: listName }, { $pull: { items: { _id: checkedItemId } } }, (err, result) => {
+            if (!err) {
+                response.redirect('/' + listName);
+            }
+        });
+    }
 });
 
-app.listen(3000, function () {
+app.listen(3000, () => {
     console.log("✔ Server is running on port 3000");
 });
