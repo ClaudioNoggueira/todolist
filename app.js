@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const date = require(__dirname + '/date.js');
 const mongoose = require('mongoose');
 const _ = require('lodash');
+require('dotenv').config();
 
 const app = express();
 
@@ -11,7 +12,9 @@ app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
-mongoose.connect('mongodb://localhost:27017/todolistDB');
+mongoose.connect("mongodb+srv://admin-claudio:" + process.env.MONGODB_ADMIN_PASSWORD + "@cluster0.m3qqo.mongodb.net/todolistDB");
+
+const day = _.capitalize(date.getDay());
 
 const itemsSchema = new mongoose.Schema({
     name: String
@@ -45,7 +48,6 @@ app.get('/', (request, response) => {
 });
 
 app.get('/home', (request, response) => {
-    const day = date.getDate();
     Item.find((err, documents) => {
         if (documents.length === 0) { /// if there is no documents on database
             Item.insertMany(defaultItems, (err) => {
@@ -82,13 +84,13 @@ app.get('/:listTitle', (request, response) => {
 });
 
 app.post('/', (request, response) => {
-    const list = request.body.list;
+    const list = _.capitalize(request.body.list);
 
     const newItem = new Item({
         name: request.body.newItem
     });
 
-    if (list === date.getDate()) {
+    if (list === day) {
         newItem.save();
         response.redirect('/');
     } else {
@@ -104,7 +106,7 @@ app.post('/delete', (request, response) => {
     const checkedItemId = request.body.checkItem;
     const listName = request.body.listName;
 
-    if (listName === date.getDate()) {
+    if (listName === day) {
         Item.findByIdAndRemove({ _id: checkedItemId }, (err) => {
             if (!err) {
                 console.log("Successfully deleted checked item.");
@@ -120,6 +122,11 @@ app.post('/delete', (request, response) => {
     }
 });
 
-app.listen(3000, () => {
-    console.log("✔ Server is running on port 3000");
+let port = process.env.PORT;
+if (port == null || port == "") {
+    port = 3000;
+}
+
+app.listen(port, () => {
+    console.log("✔ Server started successfully");
 });
